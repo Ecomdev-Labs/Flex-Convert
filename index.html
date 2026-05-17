@@ -3,78 +3,903 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Конвертер давления</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Universal Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
+        :root {
+            color-scheme: light;
+            --bg: #f3efe6;
+            --bg-accent: rgba(185, 118, 53, 0.14);
+            --surface: rgba(255, 252, 245, 0.84);
+            --surface-strong: rgba(255, 255, 255, 0.96);
+            --surface-muted: rgba(126, 94, 61, 0.08);
+            --border: rgba(126, 94, 61, 0.15);
+            --text: #1f2933;
+            --text-soft: #52606d;
+            --accent: #b85d18;
+            --accent-strong: #8f4510;
+            --accent-soft: rgba(184, 93, 24, 0.12);
+            --shadow: 0 24px 70px rgba(74, 52, 35, 0.14);
         }
-        
-        /* Скрытие стрелок у поля type="number" для эстетики */
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #141a1f;
+            --bg-accent: rgba(255, 176, 89, 0.16);
+            --surface: rgba(17, 25, 31, 0.84);
+            --surface-strong: rgba(24, 35, 43, 0.96);
+            --surface-muted: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.09);
+            --text: #f5efe6;
+            --text-soft: #b9c3ce;
+            --accent: #ffb05a;
+            --accent-strong: #ffd39d;
+            --accent-soft: rgba(255, 176, 90, 0.16);
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background:
+                radial-gradient(circle at top left, var(--bg-accent), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(41, 134, 204, 0.12), transparent 24%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        input[type="number"] {
-            -moz-appearance: textfield;
+
+        .app-shell {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .app-shell[data-active-category="currency"] {
+            --accent: #3b82f6;
+            --accent-strong: #2563eb;
+            --accent-soft: rgba(59, 130, 246, 0.14);
+        }
+
+        .category-layout {
+            align-items: start;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .category-layout.is-currency-collapsed {
+            display: block;
+        }
+
+        .category-layout.is-currency-collapsed .input-panel {
+            margin: 0 auto;
+            max-width: 46rem;
+            width: 100%;
+        }
+
+        .category-layout.is-currency-collapsed .results-panel {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .category-layout {
+                grid-template-columns: minmax(320px, 0.92fr) minmax(420px, 1.08fr);
+            }
+        }
+
+        .surface-card {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+        }
+
+        .category-pill {
+            border: 1px solid var(--border);
+            background: var(--surface-muted);
+            color: var(--text-soft);
+            transition: 180ms ease;
+        }
+
+        .category-pill:hover,
+        .category-pill:focus-visible {
+            border-color: rgba(184, 93, 24, 0.3);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .category-pill.is-active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(184, 93, 24, 0.28);
+        }
+
+        .field-control,
+        .select-control {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: var(--surface-strong);
+            color: var(--text);
+            transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+        }
+
+        .field-control:focus,
+        .select-control:focus {
+            outline: none;
+            border-color: rgba(184, 93, 24, 0.45);
+            box-shadow: 0 0 0 4px rgba(184, 93, 24, 0.12);
+        }
+
+        .field-control:disabled,
+        .select-control:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .result-card {
+            background: linear-gradient(180deg, var(--surface-strong), rgba(255, 255, 255, 0.74));
+            border: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] .result-card {
+            background: linear-gradient(180deg, rgba(24, 35, 43, 0.96), rgba(17, 25, 31, 0.9));
+        }
+
+        .copy-button,
+        .theme-button {
+            transition: 160ms ease;
+        }
+
+        .copy-button:hover,
+        .theme-button:hover,
+        .copy-button:focus-visible,
+        .theme-button:focus-visible {
+            transform: translateY(-1px);
+        }
+
+        .toast-visible {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .is-hidden {
+            display: none !important;
+        }
+
+        #categoryCustomContent:empty {
+            display: none;
+        }
+
+        .currency-preview {
+            border: 1px solid var(--border);
+            border-radius: 1.35rem;
+            background: var(--surface-strong);
+            padding: 0.9rem;
+        }
+
+        .currency-preview-header {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.85rem;
+        }
+
+        .currency-preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .currency-chip,
+        .currency-help {
+            align-items: center;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-soft);
+            display: inline-flex;
+            font-size: 0.8rem;
+            font-weight: 700;
+            gap: 0.35rem;
+            justify-content: center;
+            min-height: 2.25rem;
+            padding: 0 0.85rem;
+        }
+
+        .currency-chip.is-muted {
+            background: var(--surface-muted);
+        }
+
+        .currency-help {
+            aspect-ratio: 1;
+            min-width: 2.25rem;
+            padding: 0;
+        }
+
+        button.currency-help {
+            cursor: pointer;
+            transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease;
+        }
+
+        button.currency-help:hover,
+        button.currency-help:focus-visible {
+            background: var(--surface-muted);
+            border-color: rgba(59, 130, 246, 0.35);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-toggle-btn {
+            cursor: pointer;
+            transition: border-color 160ms ease, transform 160ms ease, background-color 160ms ease, color 160ms ease;
+        }
+
+        .currency-toggle-btn:hover,
+        .currency-toggle-btn:focus-visible {
+            background: var(--surface-muted);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--text);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-preview-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .currency-preview-row {
+            align-items: center;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            display: grid;
+            gap: 0.85rem;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            padding: 0.95rem 1rem;
+            transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        .currency-preview-row:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .currency-preview-row:focus-within {
+            border-color: rgba(59, 130, 246, 0.38);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .currency-row-label {
+            align-items: center;
+            display: flex;
+            gap: 0.8rem;
+            min-width: 0;
+        }
+
+        .currency-flag {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 0.8rem;
+            color: var(--accent);
+            display: inline-flex;
+            font-size: 0.82rem;
+            font-weight: 800;
+            height: 2.3rem;
+            justify-content: center;
+            letter-spacing: 0.08em;
+            line-height: 1;
+            min-width: 2.3rem;
+        }
+
+        .currency-row-code {
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .currency-row-name {
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 0.15rem;
+        }
+
+        .currency-row-input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            min-width: 0;
+            outline: none;
+            padding: 0;
+            text-align: right;
+            width: 100%;
+        }
+
+        .currency-row-input::placeholder {
+            color: var(--text-soft);
+            opacity: 0.7;
+        }
+
+        .currency-row-action {
+            align-items: center;
+            background: var(--surface-muted);
+            border: 1px solid transparent;
+            border-radius: 0.8rem;
+            color: var(--text-soft);
+            display: inline-flex;
+            height: 2.3rem;
+            justify-content: center;
+            transition: border-color 160ms ease, color 160ms ease, transform 160ms ease, background-color 160ms ease;
+            width: 2.3rem;
+        }
+
+        button.currency-row-action {
+            cursor: pointer;
+        }
+
+        button.currency-row-action:hover,
+        button.currency-row-action:focus-visible {
+            background: var(--accent-soft);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--accent);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-settings-btn {
+            align-items: center;
+            background: transparent;
+            border: 1px dashed var(--border);
+            border-radius: 1rem;
+            color: var(--text-soft);
+            cursor: pointer;
+            display: flex;
+            font-size: 0.98rem;
+            font-weight: 700;
+            gap: 0.55rem;
+            justify-content: center;
+            margin-top: 0.95rem;
+            padding: 0.95rem 1rem;
+            transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+            width: 100%;
+        }
+
+        .currency-settings-btn:hover,
+        .currency-settings-btn:focus-visible {
+            background: var(--surface-muted);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--text);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-calculator {
+            display: grid;
+            gap: 1rem;
+            margin: 0 auto;
+            max-width: 34rem;
+            width: 100%;
+        }
+
+        .currency-calculator-toolbar {
+            align-items: center;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: space-between;
+        }
+
+        .currency-calculator-toggle {
+            align-items: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-soft);
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 0.88rem;
+            font-weight: 800;
+            justify-content: center;
+            min-height: 2.25rem;
+            padding: 0 0.9rem;
+            transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+        }
+
+        .currency-calculator-toggle:hover,
+        .currency-calculator-toggle:focus-visible {
+            background: var(--surface-muted);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--text);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-calculator-display {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 1.1rem;
+            padding: 0.85rem 1rem;
+        }
+
+        .currency-calculator-label {
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .currency-calculator-expression {
+            color: var(--text-soft);
+            font-size: 0.96rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            margin-bottom: 0.35rem;
+            min-height: 1.2rem;
+            text-align: right;
+        }
+
+        .currency-calculator-input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: clamp(1.9rem, 3vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 1.05;
+            min-height: 3.25rem;
+            outline: none;
+            padding: 0;
+            text-align: right;
+            width: 100%;
+        }
+
+        .currency-calculator-input::placeholder {
+            color: var(--text-soft);
+            opacity: 0.7;
+        }
+
+        .currency-calculator-keypad {
+            display: grid;
+            gap: 0.55rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .currency-calculator-button {
+            align-items: center;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            color: var(--text);
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 1.16rem;
+            font-weight: 800;
+            justify-content: center;
+            min-height: 3.35rem;
+            transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, color 160ms ease;
+        }
+
+        .currency-calculator-button.is-operator,
+        .currency-calculator-button.is-equals {
+            font-size: 1.28rem;
+        }
+
+        .currency-calculator-button:hover,
+        .currency-calculator-button:focus-visible {
+            background: var(--surface-muted);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--accent);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .currency-calculator-button.is-operator {
+            background: var(--surface-muted);
+            color: var(--accent);
+        }
+
+        .currency-calculator-button.is-danger {
+            color: #f97316;
+        }
+
+        .currency-calculator-button.is-equals {
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .currency-calculator-button.is-equals:hover,
+        .currency-calculator-button.is-equals:focus-visible {
+            color: #fff;
+        }
+
+        .currency-summary {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .currency-summary-hero {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 1.1rem;
+            padding: 1rem;
+        }
+
+        .currency-summary-grid {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .currency-summary-card {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 0.95rem;
+        }
+
+        .currency-summary-label {
+            color: var(--text-soft);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .currency-summary-value {
+            color: var(--text);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-top: 0.5rem;
+        }
+
+        .currency-summary-caption {
+            color: var(--text-soft);
+            font-size: 0.86rem;
+            line-height: 1.5;
+            margin-top: 0.3rem;
+        }
+
+        .settings-modal {
+            align-items: flex-start;
+            background: rgba(8, 15, 24, 0.64);
+            display: flex;
+            inset: 0;
+            justify-content: center;
+            opacity: 1;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 1.25rem;
+            position: fixed;
+            transition: opacity 160ms ease, visibility 160ms ease;
+            visibility: visible;
+            z-index: 1000;
+        }
+
+        .settings-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .settings-modal-card {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            margin: auto 0;
+            max-height: calc(100vh - 2.5rem);
+            max-width: 28rem;
+            overflow: hidden;
+            padding: 1.2rem;
+            width: 100%;
+        }
+
+        .settings-modal-header {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .settings-modal-title {
+            color: var(--text);
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .settings-modal-close {
+            align-items: center;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-soft);
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 1.15rem;
+            height: 2.25rem;
+            justify-content: center;
+            transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+            width: 2.25rem;
+        }
+
+        .settings-modal-close:hover,
+        .settings-modal-close:focus-visible {
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--text);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .settings-modal-body {
+            display: grid;
+            flex: 1 1 auto;
+            gap: 0.7rem;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding-right: 0.2rem;
+            scrollbar-gutter: stable;
+        }
+
+        .settings-option {
+            align-items: center;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: space-between;
+            padding: 0.9rem 1rem;
+            position: relative;
+            transition: border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+        }
+
+        .settings-option.is-draggable {
+            cursor: grab;
+        }
+
+        .settings-option.is-dragging {
+            opacity: 0.48;
+        }
+
+        .settings-option.is-drop-before {
+            border-color: rgba(59, 130, 246, 0.35);
+            box-shadow: inset 0 3px 0 var(--accent);
+        }
+
+        .settings-option.is-drop-after {
+            border-color: rgba(59, 130, 246, 0.35);
+            box-shadow: inset 0 -3px 0 var(--accent);
+        }
+
+        .settings-option-main {
+            align-items: center;
+            cursor: pointer;
+            display: grid;
+            flex: 1;
+            gap: 0.8rem;
+            grid-template-columns: auto auto minmax(0, 1fr);
+            min-width: 0;
+        }
+
+        .settings-option input {
+            accent-color: var(--accent);
+            height: 1rem;
+            width: 1rem;
+        }
+
+        .settings-option-code {
+            color: var(--text);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .settings-option-name {
+            color: var(--text-soft);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .settings-drag-handle {
+            align-items: center;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 0.8rem;
+            color: var(--text-soft);
+            cursor: grab;
+            display: inline-flex;
+            flex-shrink: 0;
+            height: 2.35rem;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: border-color 160ms ease, color 160ms ease, transform 160ms ease, background-color 160ms ease;
+            width: 3.3rem;
+        }
+
+        .settings-drag-handle:hover,
+        .settings-drag-handle:focus-visible {
+            background: var(--accent-soft);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--accent);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .settings-drag-handle.is-disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+            transform: none;
+        }
+
+        @media (max-width: 640px) {
+            .currency-preview-row {
+                grid-template-columns: minmax(0, 1fr) auto;
+            }
+
+            .currency-row-action {
+                display: none;
+            }
+
+            .currency-preview-header {
+                flex-direction: column;
+            }
+
+            .currency-preview-controls {
+                justify-content: flex-start;
+            }
+
+            .currency-calculator-keypad {
+                gap: 0.5rem;
+            }
+
+            .currency-calculator-button {
+                border-radius: 0.85rem;
+                font-size: 1.02rem;
+                min-height: 3.1rem;
+            }
+
+            .currency-calculator-input {
+                font-size: clamp(1.7rem, 7vw, 2.45rem);
+                min-height: 2.9rem;
+            }
+
+            .currency-calculator-expression {
+                font-size: 0.88rem;
+            }
+
+            .currency-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-option {
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
-<body class="text-slate-800 sm:p-4 md:p-8 flex justify-center items-center min-h-screen">
+<body>
+    <div class="min-h-screen px-4 py-6 sm:px-6 lg:px-10">
+        <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center">
+            <div id="appShell" class="app-shell w-full overflow-hidden rounded-[2rem]">
+                <section class="surface-card m-4 rounded-[1.75rem] p-5 sm:m-5 sm:p-6 lg:m-6 lg:p-7">
+                    <div class="mb-5 flex flex-col gap-4 border-b pb-5" style="border-color: var(--border);">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="min-w-0">
+                                <p class="text-xs font-extrabold uppercase tracking-[0.34em]" style="color: var(--accent);">Universal Converter</p>
+                                <h1 class="mt-2 text-2xl font-extrabold leading-tight sm:text-3xl">Конвертер величин</h1>
+                                <p id="categorySummary" class="mt-2 text-sm leading-6" style="color: var(--text-soft);"></p>
+                            </div>
 
-    <!-- Главный контейнер (на мобильном на весь экран, на ПК - как экран телефона) -->
-    <div class="w-full h-screen sm:h-[850px] sm:max-w-md bg-slate-100 sm:rounded-[2.5rem] sm:shadow-2xl flex flex-col relative overflow-hidden">
-        
-        <!-- Шапка: Область ввода (стилизована под дисплей калькулятора) -->
-        <div class="bg-blue-600 px-6 pt-12 pb-8 text-white sm:rounded-t-[2.5rem] rounded-b-3xl shadow-lg z-10 flex-shrink-0">
-            <h1 class="text-center font-medium text-blue-200 tracking-wide mb-8 uppercase text-xs">
-                Конвертер давления
-            </h1>
-            
-            <div class="flex flex-col items-end">
-                <input 
-                    type="number" 
-                    id="inputValue" 
-                    class="w-full bg-transparent text-right text-5xl font-bold text-white placeholder-blue-300 focus:outline-none border-b border-blue-400 focus:border-white pb-3 transition-colors mb-5" 
-                    placeholder="0" 
-                    value="1"
-                    step="any"
-                    inputmode="decimal"
-                >
-                
-                <div class="relative w-full">
-                    <select 
-                        id="inputUnit" 
-                        class="w-full appearance-none bg-blue-700/50 border border-blue-500/50 text-white px-5 py-4 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer text-lg"
-                    >
-                        <!-- Опции генерируются через app.js -->
-                    </select>
-                    <!-- Кастомная стрелочка -->
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <button id="themeToggle" type="button" class="theme-button inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold" style="background: var(--surface-muted); color: var(--text); border: 1px solid var(--border);">
+                                <span id="themeToggleIcon" aria-hidden="true">◐</span>
+                                <span id="themeToggleLabel">Тема</span>
+                            </button>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <nav id="categoryNav" class="flex flex-wrap gap-3" aria-label="Навигация по категориям"></nav>
+
+                            <button id="calculatorToggleButton" type="button" class="currency-calculator-toggle" aria-pressed="false">
+                                <span id="calculatorToggleLabel">Калькулятор</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
+
+                    <div id="categoryLayout" class="category-layout">
+                        <section id="inputPanel" class="input-panel rounded-[1.5rem] p-5 sm:p-6" style="background: var(--surface-muted); border: 1px solid var(--border);">
+                            <div class="mb-5 flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-[0.28em]" style="color: var(--accent);">Ввод</p>
+                                    <h2 id="panelTitle" class="mt-2 text-2xl font-extrabold"></h2>
+                                </div>
+                            </div>
+
+                            <div id="genericInputControls">
+                                <label class="mb-5 block">
+                                    <span class="mb-2 block text-sm font-semibold" style="color: var(--text-soft);">Значение</span>
+                                    <input id="inputValue" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="field-control rounded-2xl px-5 py-4 text-3xl font-extrabold sm:text-4xl" placeholder="0">
+                                </label>
+
+                                <label class="block">
+                                    <span class="mb-2 block text-sm font-semibold" style="color: var(--text-soft);">Исходная единица</span>
+                                    <div class="relative">
+                                        <select id="inputUnit" class="select-control appearance-none rounded-2xl px-5 py-4 pr-14 text-base font-semibold sm:text-lg"></select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5" style="color: var(--text-soft);">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div id="categoryMeta" class="mt-5 rounded-2xl px-4 py-3 text-sm leading-6" style="background: var(--surface-strong); color: var(--text-soft); border: 1px solid var(--border);"></div>
+                            <div id="categoryCustomContent" class="mt-5"></div>
+                        </section>
+
+                        <section id="resultsPanel" class="results-panel rounded-[1.5rem] p-5 sm:p-6" style="background: linear-gradient(180deg, var(--accent-soft), transparent 36%); border: 1px solid var(--border);">
+                            <div class="mb-5 flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-[0.28em]" style="color: var(--accent);">Результаты</p>
+                                    <h2 id="resultsTitle" class="mt-2 text-2xl font-extrabold">Мгновенный пересчет</h2>
+                                </div>
+                                <span id="resultsCount" class="rounded-full px-3 py-2 text-xs font-bold uppercase tracking-[0.24em]" style="background: var(--surface-strong); color: var(--text-soft); border: 1px solid var(--border);"></span>
+                            </div>
+
+                            <div id="resultsGrid" class="grid gap-3"></div>
+                        </section>
+                    </div>
+                </section>
             </div>
-        </div>
-
-        <!-- Тело: Список результатов -->
-        <div class="flex-1 overflow-y-auto p-4 sm:px-6 pb-24 space-y-3 bg-slate-100" id="resultsGrid">
-            <!-- Карточки с результатами генерируются через app.js -->
-        </div>
-
-        <!-- Уведомление о копировании (Toast) -->
-        <div id="toast" class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full font-medium shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            Скопировано!
         </div>
     </div>
 
-    <!-- Подключаем логику -->
-    <script src="app.js"></script>
+    <div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 flex -translate-x-1/2 translate-y-5 items-center gap-3 rounded-full px-5 py-3 text-sm font-semibold text-white opacity-0 transition-all duration-300" style="background: rgba(15, 23, 42, 0.9); box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);">
+        <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toastLabel">Скопировано в буфер</span>
+    </div>
+
+    <div id="currencySettingsModal" class="settings-modal hidden" aria-hidden="true">
+        <div class="settings-modal-card" role="dialog" aria-modal="true" aria-labelledby="currencySettingsTitle">
+            <div class="settings-modal-header">
+                <h2 id="currencySettingsTitle" class="settings-modal-title">Выбор валют</h2>
+                <button type="button" id="closeCurrencySettings" class="settings-modal-close" data-action="close-currency-settings" aria-label="Закрыть">×</button>
+            </div>
+            <div id="currencySettingsBody" class="settings-modal-body"></div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
