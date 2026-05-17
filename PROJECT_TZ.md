@@ -80,7 +80,7 @@
 
 ### 7.1. Pressure Converter Web
 
-Модуль размещен в корне проекта и состоит из `index.html` и `app.js`.
+Модуль размещен в корне проекта, использует `index.html` как HTML-вход и модульную JavaScript-структуру в каталоге `src`.
 
 Функциональные требования:
 
@@ -349,7 +349,7 @@
 
 Исходные артефакты:
 
-- `index.html`, `app.js`, `README.md` в корне проекта;
+- `index.html`, `src/*`, `README.md` в корне проекта;
 - `course-convertor/index.html`, `course-convertor/css/style.css`, `course-convertor/js/api.js`, `course-convertor/js/converter.js`, `course-convertor/js/app.js`, `course-convertor/README.md`;
 - `legacy_cpp/Engineering-Calculator/Code/*`;
 - `legacy_cpp/pressure-transfer-cpp/code/*`;
