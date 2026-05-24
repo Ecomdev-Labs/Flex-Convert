@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таблица преобразования температуры: Цельсий в Фаренгейт и обратно</title>
+    <meta name="description" content="Полная таблица и формулы для преобразования температуры между Цельсием, Фаренгейтом и Кельвином. Быстрый конвертер температур онлайн.">
+    <meta name="keywords" content="температура, конвертер, Цельсий, Фаренгейт, Кельвин, преобразование">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://flex-convert.ecomdev.uz/guides/temperature-conversion.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f3efe6;
+            --surface: rgba(255, 252, 245, 0.84);
+            --border: rgba(126, 94, 61, 0.15);
+            --text: #1f2933;
+            --text-soft: #52606d;
+            --accent: #b85d18;
+        }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+        th { background: var(--accent); color: white; font-weight: 600; }
+        tr:nth-child(even) { background: rgba(184, 93, 24, 0.05); }
+    </style>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Таблица преобразования температуры",
+        "datePublished": "2026-05-24"
+    }
+    </script>
+</head>
+<body>
+    <header class="border-b" style="border-color: var(--border);">
+        <nav class="max-w-4xl mx-auto px-4 py-4 flex justify-between">
+            <a href="/" class="text-2xl font-bold" style="color: var(--accent);">Flex Convert</a>
+            <a href="/" class="text-sm hover:opacity-70">Конвертер</a>
+        </nav>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <article style="background: var(--surface); border: 1px solid var(--border);" class="rounded-lg p-8">
+            <h1 class="text-4xl font-bold mb-4">Таблица преобразования температуры</h1>
+            <p style="color: var(--text-soft);" class="mb-8">Полное руководство по преобразованию температуры между Цельсием, Фаренгейтом и Кельвином</p>
+
+            <h2 class="text-2xl font-bold mb-4">Формулы преобразования</h2>
+            <div style="background: rgba(184, 93, 24, 0.05);" class="p-6 rounded mb-8 font-mono text-sm">
+                <p><strong>°C → °F:</strong> (°C × 9/5) + 32</p>
+                <p><strong>°F → °C:</strong> (°F − 32) × 5/9</p>
+                <p><strong>°C → K:</strong> °C + 273.15</p>
+                <p><strong>K → °C:</strong> K − 273.15</p>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Таблица преобразования: Цельсий → Фаренгейт</h2>
+            <div class="overflow-x-auto mb-8">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Цельсий (°C)</th>
+                            <th>Фаренгейт (°F)</th>
+                            <th>Описание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>-40</td><td>-40</td><td>Точка пересечения</td></tr>
+                        <tr><td>-20</td><td>-4</td><td>Холодная зима</td></tr>
+                        <tr><td>0</td><td>32</td><td>Точка замерзания воды</td></tr>
+                        <tr><td>10</td><td>50</td><td>Холодно</td></tr>
+                        <tr><td>20</td><td>68</td><td>Комнатная температура</td></tr>
+                        <tr><td>30</td><td>86</td><td>Тепло</td></tr>
+                        <tr><td>37</td><td>98.6</td><td>Температура тела</td></tr>
+                        <tr><td>40</td><td>104</td><td>Очень жарко</td></tr>
+                        <tr><td>100</td><td>212</td><td>Точка кипения воды</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4">Практические примеры</h2>
+            <ul style="color: var(--text-soft);" class="list-disc list-inside space-y-3">
+                <li><strong>Комнатная температура:</strong> 20°C = 68°F (удобная для большинства людей)</li>
+                <li><strong>Температура тела:</strong> 37°C = 98.6°F (норма для здорового человека)</li>
+                <li><strong>Кипящая вода:</strong> 100°C = 212°F (в этот момент вода переходит в пар)</li>
+                <li><strong>Замерзающая вода:</strong> 0°C = 32°F (точка, где вода становится льдом)</li>
+            </ul>
+
+            <div style="background: rgba(184, 93, 24, 0.1); border-left: 4px solid var(--accent);" class="p-4 rounded mt-8">
+                <p style="margin: 0;">
+                    <strong>Нужно быстро конвертировать температуру?</strong> 
+                    Используйте <a href="/">Flex Convert</a> для мгновенного преобразования температур.
+                </p>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

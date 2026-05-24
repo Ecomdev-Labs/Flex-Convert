@@ -66,6 +66,14 @@
             }
         }
     </script>
+    <!-- Google Analytics 4 - Подключить с вашим ID (измените GA_MEASUREMENT_ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID', { anonymize_ip: true });
+    </script>
     <style>
         :root {
             color-scheme: light;
@@ -1385,6 +1393,17 @@
     </style>
 </head>
 <body>
+    <!-- Навигация -->
+    <nav style="background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40;" class="mb-4">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-10 flex justify-between items-center">
+            <a href="/" style="color: var(--accent); font-weight: 700;">Flex Convert</a>
+            <div class="flex gap-4 text-sm">
+                <a href="/partners.html" style="color: var(--accent); text-decoration: none;">Партнёрство</a>
+                <a href="/guides/currency-conversion.html" style="color: var(--accent); text-decoration: none;">Гайды</a>
+            </div>
+        </div>
+    </nav>
+    
     <div class="min-h-screen px-4 py-6 sm:px-6 lg:px-10">
         <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center">
             <div id="appShell" class="app-shell w-full overflow-hidden rounded-[2rem]">
