@@ -56,9 +56,12 @@
     <header class="sticky top-0 z-50 bg-opacity-90 backdrop-blur-sm border-b" style="border-color: var(--border);">
         <nav class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
             <a href="/" class="text-2xl font-bold" style="color: var(--accent);">Flex Convert</a>
-            <div class="flex gap-6">
+            <div class="flex gap-6 items-center">
                 <a href="/" class="text-sm hover:opacity-70">Конвертер</a>
                 <a href="/partners.html" class="text-sm font-semibold" style="color: var(--accent);">Партнёрство</a>
+                <button data-theme-toggle type="button" class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm" style="background: var(--surface-muted); color: var(--text); border: 1px solid var(--border); cursor: pointer;">
+                    <span data-theme-icon aria-hidden="true">◐</span>
+                </button>
             </div>
         </nav>
     </header>
@@ -237,5 +240,6 @@
             </p>
         </div>
     </footer>
+    <script src="/src/theme.js"></script>
 </body>
 </html>
